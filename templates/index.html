@@ -1,17 +1,17 @@
 {{define "index"}}
-<div class="space-y-6">
+<div id="tab-root" class="space-y-6">
   
   <div class="bg-white p-1.5 rounded-2xl border border-gray-200 inline-flex w-full sm:w-auto shadow-sm">
     <div class="grid grid-cols-3 gap-1 w-full sm:w-auto">
-      <a href="/?tab=create&region={{.Region}}&az={{.AZ}}"
+      <a href="/?tab=create&region={{.Region}}&az={{.AZ}}" data-tab-link
          class="px-6 py-2 rounded-xl text-sm font-semibold text-center transition-all duration-200 {{if eq .Tab "create"}}bg-slate-900 text-white shadow-md{{else}}text-slate-600 hover:bg-slate-50 hover:text-slate-900{{end}}">
         🚀 创建
       </a>
-      <a href="/?tab=manage&region={{.Region}}&az={{.AZ}}"
+      <a href="/?tab=manage&region={{.Region}}&az={{.AZ}}" data-tab-link
          class="px-6 py-2 rounded-xl text-sm font-semibold text-center transition-all duration-200 {{if eq .Tab "manage"}}bg-slate-900 text-white shadow-md{{else}}text-slate-600 hover:bg-slate-50 hover:text-slate-900{{end}}">
         🧰 管理
       </a>
-      <a href="/?tab=quota&region={{.Region}}&az={{.AZ}}"
+      <a href="/?tab=quota&region={{.Region}}&az={{.AZ}}" data-tab-link
          class="px-6 py-2 rounded-xl text-sm font-semibold text-center transition-all duration-200 {{if eq .Tab "quota"}}bg-slate-900 text-white shadow-md{{else}}text-slate-600 hover:bg-slate-50 hover:text-slate-900{{end}}">
         📌 配额
       </a>
@@ -355,17 +355,4 @@
 
   </div>
 </div>
-
-<script>
-  async function copyText(text){
-    if(!text) return;
-    try{
-      await navigator.clipboard.writeText(text);
-    }catch(e){
-      const t=document.createElement('textarea');
-      t.value=text;document.body.appendChild(t);t.select();
-      document.execCommand('copy');document.body.removeChild(t);
-    }
-  }
-</script>
 {{end}}
