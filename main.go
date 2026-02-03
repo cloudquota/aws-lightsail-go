@@ -4,7 +4,6 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"html/template"
-	"math"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -67,13 +66,7 @@ type PageData struct {
 	ProxyExitASN string
 
 	// Manage
-	Instances        []aws.InstanceView
-	BalanceBase      string
-	BalanceUsed      string
-	BalanceRemaining string
-	BalanceCurrency  string
-	BalancePeriod    string
-	BalanceUpdated   string
+	Instances []aws.InstanceView
 
 	// Quota
 	QuotaRegion string
@@ -110,18 +103,6 @@ func mustEnvInt(key string, def int) int {
 		return def
 	}
 	return i
-}
-
-func mustEnvFloat(key string, def float64) float64 {
-	v := strings.TrimSpace(os.Getenv(key))
-	if v == "" {
-		return def
-	}
-	f, err := strconv.ParseFloat(v, 64)
-	if err != nil {
-		return def
-	}
-	return f
 }
 
 var regionOptions = []RegionOption{
@@ -467,12 +448,6 @@ func main() {
 			data.Flash.Success = "已提交删除（如有静态 IP 已尝试释放）"
 		case "delete_failed":
 			data.Flash.Error = "删除失败（详情看日志）"
-		case "balance_ok":
-			data.Flash.Success = "✅ 余额已刷新"
-		case "balance_err":
-			data.Flash.Error = "余额查询失败：请检查权限或稍后重试"
-		case "balance_need":
-			data.Flash.Warn = "请先启用一个有效密钥再查询余额"
 		}
 
 		// manage list
@@ -496,20 +471,6 @@ func main() {
 			}
 		} else if tab == "manage" && !activeHasCreds {
 			data.Flash.Warn = "请先启用一个有效密钥再查看实例列表"
-		}
-
-		if tab == "manage" {
-			defaultBase := mustEnvFloat("CREDIT_BASELINE", 100)
-			base := strings.TrimSpace(s.GetString("balance_base", ""))
-			if base == "" {
-				base = strconv.FormatFloat(defaultBase, 'f', 2, 64)
-			}
-			data.BalanceBase = base
-			data.BalanceUsed = s.GetString("balance_used", "")
-			data.BalanceRemaining = s.GetString("balance_remaining", "")
-			data.BalanceCurrency = s.GetString("balance_currency", "USD")
-			data.BalancePeriod = s.GetString("balance_period", "")
-			data.BalanceUpdated = s.GetString("balance_updated", "")
 		}
 
 		// quota result from session
@@ -797,53 +758,6 @@ func main() {
 		key := strings.Join([]string{"inst", region, ak, proxy}, "|")
 		instCache.Delete(key)
 		c.Redirect(http.StatusFound, "/?tab=manage&region="+region)
-	})
-
-	// Balance query (monthly credits usage vs baseline)
-	r.POST("/aws/balance", func(c *gin.Context) {
-		s := session.Must(c)
-		userID, _ := userIDFromSession(s)
-		keys, _ := appStore.ListKeys(c.Request.Context(), userID)
-		activeKey, _ := resolveActiveKey(s, keys)
-		if activeKey == nil || strings.TrimSpace(activeKey.AccessKey) == "" || strings.TrimSpace(activeKey.SecretKey) == "" {
-			c.Redirect(http.StatusFound, "/?tab=manage&msg=balance_need")
-			return
-		}
-		ak := strings.TrimSpace(activeKey.AccessKey)
-		sk := strings.TrimSpace(activeKey.SecretKey)
-		proxy := strings.TrimSpace(activeKey.Proxy)
-
-		creditBase := mustEnvFloat("CREDIT_BASELINE", 100)
-		creditSummary, err := aws.FetchMonthlyCreditUsage(c.Request.Context(), ak, sk, proxy)
-		if err != nil {
-			s.SetString("balance_used", "")
-			s.SetString("balance_remaining", "")
-			s.SetString("balance_currency", "USD")
-			s.SetString("balance_period", "")
-			s.SetString("balance_updated", "")
-			c.Redirect(http.StatusFound, "/?tab=manage&msg=balance_err")
-			return
-		}
-		used := math.Abs(creditSummary.UsedAmount)
-		remaining := creditBase - used
-		if remaining < 0 {
-			remaining = 0
-		}
-		s.SetString("balance_base", strconv.FormatFloat(creditBase, 'f', 2, 64))
-		s.SetString("balance_used", strconv.FormatFloat(used, 'f', 2, 64))
-		s.SetString("balance_remaining", strconv.FormatFloat(remaining, 'f', 2, 64))
-		if creditSummary.Currency != "" {
-			s.SetString("balance_currency", creditSummary.Currency)
-		} else {
-			s.SetString("balance_currency", "USD")
-		}
-		if creditSummary.PeriodStart != "" && creditSummary.PeriodEnd != "" {
-			s.SetString("balance_period", creditSummary.PeriodStart+" ~ "+creditSummary.PeriodEnd)
-		} else {
-			s.SetString("balance_period", "")
-		}
-		s.SetString("balance_updated", time.Now().Format("2006-01-02 15:04:05"))
-		c.Redirect(http.StatusFound, "/?tab=manage&msg=balance_ok")
 	})
 
 	r.POST("/aws/delete", func(c *gin.Context) {
