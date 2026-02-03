@@ -186,6 +186,44 @@
           </form>
         </div>
 
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
+          <div class="lg:col-span-2 rounded-2xl border border-slate-100 bg-slate-50 p-4">
+            <div class="flex items-start justify-between gap-4">
+              <div>
+                <div class="text-xs font-semibold text-slate-400 uppercase tracking-wide">余额估算</div>
+                {{if .BalanceUpdated}}
+                  <div class="text-2xl font-bold text-slate-900 mt-1">
+                    {{.BalanceRemaining}} {{.BalanceCurrency}}
+                  </div>
+                  <div class="text-xs text-slate-500 mt-1">
+                    已使用 {{.BalanceUsed}} / 总额度 {{.BalanceBase}} {{.BalanceCurrency}}
+                  </div>
+                  <div class="text-[10px] text-slate-400 mt-1">
+                    周期 {{.BalancePeriod}} · 更新于 {{.BalanceUpdated}}
+                  </div>
+                {{else}}
+                  <div class="text-sm text-slate-500 mt-2">暂未查询余额，点击右侧按钮刷新。</div>
+                  <div class="text-[10px] text-slate-400 mt-1">
+                    默认总额度 {{.BalanceBase}} {{.BalanceCurrency}}（可通过 CREDIT_BASELINE 环境变量调整）
+                  </div>
+                  {{if .BalanceError}}
+                    <div class="text-[11px] text-rose-600 mt-2 break-all">错误详情：{{.BalanceError}}</div>
+                  {{end}}
+                {{end}}
+              </div>
+            </div>
+          </div>
+          <form method="post" action="/aws/balance" class="rounded-2xl border border-gray-200 bg-white p-4 flex flex-col justify-between shadow-sm">
+            <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+            <div class="text-xs font-semibold text-slate-500 uppercase tracking-wide">余额查询</div>
+            <button class="mt-3 w-full inline-flex items-center justify-center gap-2 rounded-xl bg-primary-600 text-white px-4 py-2.5 text-sm font-semibold hover:bg-primary-500 active:bg-primary-700 transition shadow">
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8V6m0 8v2m-6-6a6 6 0 1112 0 6 6 0 01-12 0z"/></svg>
+              查询余额
+            </button>
+            <div class="text-[10px] text-slate-400 mt-2">基于 Cost Explorer 月度 Credits。</div>
+          </form>
+        </div>
+
         {{if .HasCreds}}
           {{if not .Instances}}
             <div class="rounded-2xl border border-dashed border-slate-300 bg-slate-50/50 p-12 text-center">
