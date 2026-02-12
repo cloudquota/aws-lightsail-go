@@ -1,21 +1,26 @@
 {{define "layout"}}
 <!doctype html>
-<html lang="zh-CN">
+<html lang="zh-CN" class="h-full">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{{.Title}}</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     body { font-family: 'Inter', sans-serif; }
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none;  scrollbar-width: none; }
-    /* 平滑滚动 */
     html { scroll-behavior: smooth; }
-    /* 自定义动画 */
     @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
     .animate-fade-in { animation: fadeIn 0.3s ease-out forwards; }
+    
+    /* 玻璃拟态与背景 */
+    .glass-nav {
+      background: rgba(255, 255, 255, 0.8);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
   </style>
   <script>
     tailwind.config = {
@@ -27,6 +32,7 @@
           },
           boxShadow: {
             'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
+            'card': '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
             'glow': '0 0 15px rgba(99, 102, 241, 0.15)'
           }
         }
@@ -35,280 +41,266 @@
   </script>
 </head>
 
-<body class="min-h-screen bg-[#F8FAFC] text-slate-800 antialiased selection:bg-primary-100 selection:text-primary-900">
+<body class="min-h-full bg-slate-50 text-slate-800 antialiased selection:bg-indigo-100 selection:text-indigo-900 pb-20">
 
-  <div class="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
-    <div class="absolute -top-[20%] -left-[10%] h-[500px] w-[500px] rounded-full bg-indigo-50/60 blur-[100px]"></div>
-    <div class="absolute top-[20%] right-[0%] h-[400px] w-[400px] rounded-full bg-purple-50/60 blur-[100px]"></div>
+  <div class="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
+    <div class="absolute -top-[20%] -left-[10%] h-[600px] w-[600px] rounded-full bg-indigo-100/50 blur-[100px]"></div>
+    <div class="absolute top-[10%] right-[0%] h-[500px] w-[500px] rounded-full bg-purple-100/40 blur-[100px]"></div>
   </div>
 
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 space-y-8">
-
-    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-2">
-      <div>
-        <h1 class="text-3xl font-extrabold tracking-tight text-slate-900">
-          {{.Title}}
-        </h1>
-        {{if .Username}}
-          <div class="flex items-center gap-2 mt-2">
-            <span class="inline-flex items-center justify-center h-6 w-6 rounded-full bg-primary-100 text-xs font-bold text-primary-700">
-              {{slice .Username 0 1}}
-            </span>
-            <p class="text-sm text-slate-500 font-medium">{{.Username}}</p>
+  <header class="sticky top-0 z-40 w-full border-b border-slate-200/60 glass-nav">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex h-16 items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="bg-indigo-600 text-white p-1.5 rounded-lg shadow-sm">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
           </div>
-        {{end}}
-      </div>
-      <form method="post" action="/logout">
-        <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
-        <button class="group flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-slate-600 bg-white border border-slate-200 shadow-sm hover:bg-slate-50 hover:text-rose-600 hover:border-rose-200 transition-all duration-200">
-          <span>退出登录</span>
-          <svg class="w-4 h-4 text-slate-400 group-hover:text-rose-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
-        </button>
-      </form>
-    </div>
+          <h1 class="text-lg font-bold tracking-tight text-slate-900 hidden sm:block">
+            {{.Title}}
+          </h1>
+        </div>
 
-    <div id="flash-root" class="fixed right-4 top-24 z-50 w-full max-w-sm space-y-3 animate-fade-in sm:right-6">
+        <div class="flex items-center gap-4">
+          {{if .Username}}
+            <div class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-100/50 border border-slate-200/60">
+              <span class="inline-flex items-center justify-center h-5 w-5 rounded-full bg-indigo-100 text-[10px] font-bold text-indigo-700">
+                {{slice .Username 0 1}}
+              </span>
+              <p class="text-xs text-slate-600 font-bold pr-1">{{.Username}}</p>
+            </div>
+          {{end}}
+
+          <form method="post" action="/logout">
+            <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+            <button class="group flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold text-slate-500 hover:text-rose-600 hover:bg-rose-50 transition-colors">
+              <span>退出</span>
+              <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+
+    <div id="flash-root" class="fixed right-4 top-20 z-50 w-full max-w-sm space-y-3 animate-fade-in sm:right-6 pointer-events-none">
+      <div class="pointer-events-auto space-y-2">
       {{if or .Flash.Success .Flash.Error .Flash.Warn .Flash.Info}}
         {{if .Flash.Success}}
-          <div class="flex items-center gap-3 rounded-2xl border border-emerald-100 bg-white p-4 shadow-soft text-sm font-medium text-emerald-800">
-            <div class="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-emerald-50 text-emerald-600">
-              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-            </div>
+          <div class="flex items-center gap-3 rounded-xl border border-emerald-100 bg-white/90 backdrop-blur shadow-lg p-4 text-sm font-medium text-emerald-800">
+            <svg class="w-5 h-5 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
             {{.Flash.Success}}
           </div>
         {{end}}
-
         {{if .Flash.Error}}
-          <div class="flex items-center gap-3 rounded-2xl border border-rose-100 bg-white p-4 shadow-soft text-sm font-medium text-rose-800">
-            <div class="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-rose-50 text-rose-600">
-              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-            </div>
-            {{.Flash.Error}}
+          <div class="flex items-center gap-3 rounded-xl border border-rose-100 bg-white/90 backdrop-blur shadow-lg p-4 text-sm font-medium text-rose-800">
+             <svg class="w-5 h-5 text-rose-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+             {{.Flash.Error}}
           </div>
         {{end}}
-
         {{if .Flash.Warn}}
-          <div class="flex items-center gap-3 rounded-2xl border border-amber-100 bg-white p-4 shadow-soft text-sm font-medium text-amber-800">
-            <div class="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-amber-50 text-amber-600">
-              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-            </div>
-            {{.Flash.Warn}}
+          <div class="flex items-center gap-3 rounded-xl border border-amber-100 bg-white/90 backdrop-blur shadow-lg p-4 text-sm font-medium text-amber-800">
+             <svg class="w-5 h-5 text-amber-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+             {{.Flash.Warn}}
           </div>
         {{end}}
-
         {{if .Flash.Info}}
-          <div class="flex items-center gap-3 rounded-2xl border border-sky-100 bg-white p-4 shadow-soft text-sm font-medium text-sky-700">
-            <div class="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-sky-50 text-sky-600">
-              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-            </div>
+          <div class="flex items-center gap-3 rounded-xl border border-blue-100 bg-white/90 backdrop-blur shadow-lg p-4 text-sm font-medium text-blue-700">
+            <svg class="w-5 h-5 text-blue-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
             {{.Flash.Info}}
           </div>
         {{end}}
       {{end}}
+      </div>
     </div>
 
     <div class="grid gap-6 lg:grid-cols-2">
-      <div class="rounded-2xl bg-white border border-slate-200/60 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] p-1 overflow-hidden transition-all hover:shadow-lg">
+      
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 hover:shadow-md transition-shadow duration-300 overflow-hidden">
         <details class="group" role="region">
-          <summary class="flex cursor-pointer list-none items-center justify-between p-5 rounded-xl hover:bg-slate-50/80 transition-colors">
-            <div class="flex items-center gap-3 text-slate-800 font-bold text-base">
-              <span class="flex items-center justify-center w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 ring-1 ring-indigo-100">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-              </span>
-              凭证配置
+          <summary class="flex cursor-pointer select-none items-center justify-between p-5 hover:bg-slate-50 transition-colors">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-600 ring-1 ring-indigo-100/50">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg>
+              </div>
+              <div>
+                <h3 class="text-sm font-bold text-slate-900">凭证配置</h3>
+                <p class="text-xs text-slate-500 mt-0.5">Access Key & Secret</p>
+              </div>
             </div>
-            <div class="flex items-center gap-3 text-xs">
-              <span class="font-semibold text-slate-500 px-2.5 py-1 rounded-md bg-slate-100 border border-slate-200">SQL Storage</span>
-              <span class="text-slate-400 transition-transform duration-300 group-open:rotate-180">
-                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-              </span>
-            </div>
+            <span class="text-slate-400 group-open:rotate-180 transition-transform duration-300">
+              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+            </span>
           </summary>
 
-          <div class="px-6 pb-6 pt-2 animate-fade-in border-t border-slate-50">
-            <form method="post" action="/auth/save" class="space-y-5 mt-4">
+          <div class="px-5 pb-6 pt-2 border-t border-slate-100 bg-slate-50/50">
+            <form method="post" action="/auth/save" class="space-y-4 mt-2">
               <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
               <input type="hidden" name="key_id" value="{{.PendingKey}}">
               
-              <div class="grid gap-5 sm:grid-cols-2">
-                <div class="col-span-2 sm:col-span-1">
-                  <label class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1.5 ml-0.5">密钥名称</label>
-                  <input name="key_name" placeholder="例如：主账号 / 香港节点"
-                         class="block w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-medium transition-all focus:border-primary-500 focus:bg-white focus:ring-4 focus:ring-primary-500/10 outline-none placeholder:text-slate-400"
+              <div class="grid gap-4 sm:grid-cols-2">
+                <div class="col-span-2 sm:col-span-1 space-y-1.5">
+                  <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wide">密钥别名</label>
+                  <input name="key_name" placeholder="如：个人账号"
+                         class="w-full rounded-lg border-slate-200 bg-white px-3 py-2 text-sm font-medium focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 outline-none shadow-sm transition placeholder:text-slate-300"
                          value="{{.KeyName}}">
                 </div>
-                 <div class="col-span-2 sm:col-span-1">
-                  <label class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1.5 ml-0.5">Access Key</label>
+                 <div class="col-span-2 sm:col-span-1 space-y-1.5">
+                  <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wide">Access Key</label>
                   <input name="ak" placeholder="AKIA..."
-                         class="block w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-medium transition-all focus:border-primary-500 focus:bg-white focus:ring-4 focus:ring-primary-500/10 outline-none placeholder:text-slate-400"
+                         class="w-full rounded-lg border-slate-200 bg-white px-3 py-2 text-sm font-medium focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 outline-none shadow-sm transition placeholder:text-slate-300"
                          value="{{.AK}}">
                 </div>
               </div>
 
-              <div>
-                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1.5 ml-0.5">Secret Key</label>
+              <div class="space-y-1.5">
+                <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wide">Secret Key</label>
                 <input name="sk" placeholder="••••••••" type="password"
-                       class="block w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-medium transition-all focus:border-primary-500 focus:bg-white focus:ring-4 focus:ring-primary-500/10 outline-none placeholder:text-slate-400">
+                       class="w-full rounded-lg border-slate-200 bg-white px-3 py-2 text-sm font-medium focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 outline-none shadow-sm transition placeholder:text-slate-300">
               </div>
 
-              <div>
-                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1.5 ml-0.5">Proxy (可选)</label>
+              <div class="space-y-1.5">
+                <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wide">Proxy (可选)</label>
                 <div class="relative">
                   <input name="proxy" placeholder="http://user:pass@ip:port"
-                         class="block w-full rounded-xl border-slate-200 bg-slate-50 pl-4 pr-24 py-2.5 text-sm font-medium transition-all focus:border-primary-500 focus:bg-white focus:ring-4 focus:ring-primary-500/10 outline-none placeholder:text-slate-400"
+                         class="w-full rounded-lg border-slate-200 bg-white pl-3 pr-24 py-2 text-sm font-medium focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 outline-none shadow-sm transition placeholder:text-slate-300"
                          value="{{.Proxy}}">
                   <button type="button" id="proxyCheckBtn"
-                          class="absolute right-1.5 top-1.5 bottom-1.5 rounded-lg bg-white border border-slate-200 px-3 text-xs font-bold text-slate-600 hover:text-primary-600 hover:border-primary-200 hover:bg-primary-50 transition-colors shadow-sm">
-                    检查连通性
+                          class="absolute right-1 top-1 bottom-1 rounded-md bg-slate-100 border border-slate-200 px-3 text-xs font-bold text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 hover:border-indigo-200 transition-colors">
+                    测试
                   </button>
                 </div>
               </div>
 
-              <div id="proxyCheckResult" class="hidden text-xs rounded-xl p-3"></div>
+              <div id="proxyCheckResult" class="hidden text-xs rounded-lg p-3"></div>
 
-              <div class="grid gap-3 sm:grid-cols-2 pt-2">
-                <button name="mode" value="create" class="w-full rounded-xl bg-slate-900 text-white shadow-lg shadow-slate-900/20 py-2.5 text-sm font-bold hover:bg-slate-800 hover:shadow-xl hover:-translate-y-0.5 transition-all">
-                  保存为新密钥
+              <div class="grid grid-cols-2 gap-3 pt-2">
+                <button name="mode" value="create" class="rounded-lg bg-slate-900 text-white shadow-lg shadow-slate-900/10 py-2.5 text-xs font-bold hover:bg-slate-800 hover:translate-y-px transition-all">
+                  保存为新凭证
                 </button>
-                <button name="mode" value="update" class="w-full rounded-xl border border-slate-200 bg-white text-slate-700 shadow-sm py-2.5 text-sm font-bold hover:border-primary-300 hover:text-primary-600 hover:bg-primary-50 hover:shadow transition-all">
-                  更新当前密钥
+                <button name="mode" value="update" class="rounded-lg border border-slate-200 bg-white text-slate-700 shadow-sm py-2.5 text-xs font-bold hover:bg-slate-50 hover:text-indigo-600 transition-colors">
+                  更新当前
                 </button>
               </div>
 
-              <div class="flex items-center justify-between px-1 pt-1 border-t border-slate-50">
-                 <div class="text-[10px] font-medium text-slate-400">SK 保存后自动隐藏</div>
+              <div class="flex items-center justify-between px-1 pt-1">
+                 <div class="text-[10px] text-slate-400">SK 仅在输入时保存</div>
                 {{if .HasCreds}}
-                  <span class="inline-flex items-center gap-1.5 text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-md border border-emerald-100/50">
-                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> 已保存
+                  <span class="inline-flex items-center gap-1.5 text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-100">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> 已缓存
                   </span>
                 {{end}}
               </div>
             </form>
-
           </div>
         </details>
       </div>
 
-      <div class="rounded-2xl bg-white border border-slate-200/60 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] p-1 overflow-hidden transition-all hover:shadow-lg">
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 hover:shadow-md transition-shadow duration-300 overflow-hidden">
         <details class="group" role="region">
-          <summary class="flex cursor-pointer list-none items-center justify-between p-5 rounded-xl hover:bg-slate-50/80 transition-colors">
-            <div class="flex items-center gap-3 text-slate-800 font-bold text-base">
-              <span class="flex items-center justify-center w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 ring-1 ring-emerald-100">
-                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5h18M3 12h18M3 19h18"/></svg>
-              </span>
-              AWS 账号列表
+          <summary class="flex cursor-pointer select-none items-center justify-between p-5 hover:bg-slate-50 transition-colors">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600 ring-1 ring-emerald-100/50">
+                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+              </div>
+              <div>
+                <h3 class="text-sm font-bold text-slate-900">账号列表</h3>
+                <p class="text-xs text-slate-500 mt-0.5">切换多账号 & 配额</p>
+              </div>
             </div>
-            <div class="flex items-center gap-3 text-xs">
-              {{if .Keys}}
-                <span class="font-semibold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-md border border-emerald-100">{{len .Keys}} 个账号</span>
+            <div class="flex items-center gap-2">
+               {{if .Keys}}
+                <span class="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-100">{{len .Keys}} 个</span>
               {{end}}
-              <span class="text-slate-400 transition-transform duration-300 group-open:rotate-180">
-                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+              <span class="text-slate-400 group-open:rotate-180 transition-transform duration-300">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
               </span>
             </div>
           </summary>
 
-          <div class="px-6 pb-6 pt-2 animate-fade-in border-t border-slate-50">
-            <div class="mt-4">
+          <div class="px-5 pb-6 pt-2 border-t border-slate-100 bg-slate-50/50">
+            <div class="mt-2">
               {{if .Keys}}
-                <div class="rounded-xl border border-emerald-100 bg-emerald-50/50 px-4 py-3 text-xs text-emerald-800 mb-4 flex items-center gap-2">
-                  <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
-                  当前使用：<span class="font-bold font-mono">{{if .ActiveKey}}{{.ActiveKey}}{{else}}未启用{{end}}</span>
+                <div class="flex items-center justify-between rounded-lg border border-indigo-100 bg-indigo-50/50 px-3 py-2 mb-3">
+                  <div class="flex items-center gap-2 text-xs text-indigo-900">
+                    <span class="relative flex h-2 w-2">
+                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
+                      <span class="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
+                    </span>
+                    当前：<span class="font-bold font-mono">{{if .ActiveKey}}{{.ActiveKey}}{{else}}未选择{{end}}</span>
+                  </div>
                 </div>
                 
-                <div class="rounded-xl border border-indigo-100 bg-indigo-50/40 px-4 py-3 text-xs text-slate-700 mb-4">
-                  <form method="post" action="/aws/quota" class="space-y-3">
+                <div class="bg-white rounded-lg border border-slate-200 p-3 mb-3 shadow-sm">
+                  <form method="post" action="/aws/quota" class="space-y-2">
                     <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
-                    <div class="grid gap-2 sm:grid-cols-[1fr_auto] items-end">
-                      <div>
-                        <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wide mb-1">测试区域</label>
-                        <select name="quota_region"
-                                class="appearance-none w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-[11px] font-semibold text-slate-700 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/10 outline-none transition">
+                    <div class="flex gap-2">
+                       <div class="relative flex-1">
+                        <select name="quota_region" class="w-full appearance-none rounded-md border border-slate-200 bg-slate-50 px-2 py-1.5 text-[11px] font-semibold text-slate-700 outline-none focus:border-indigo-500 transition">
                           {{range .QuotaRegions}}
                             <option value="{{.ID}}" {{if eq .ID $.QuotaRegion}}selected{{end}}>{{.ID}} · {{.Name}}</option>
                           {{end}}
                         </select>
                       </div>
-                      <button class="h-9 rounded-lg bg-white border border-indigo-200 px-4 text-[11px] font-bold text-indigo-600 hover:bg-indigo-50 hover:border-indigo-300 transition">
-                        刷新配额
+                      <button class="shrink-0 rounded-md bg-white border border-slate-200 text-slate-600 px-3 py-1.5 text-[10px] font-bold hover:text-indigo-600 hover:border-indigo-300 transition">
+                        刷新
                       </button>
                     </div>
-                    <div class="flex flex-wrap items-center gap-2 text-[11px]">
-                      <span class="font-semibold text-slate-500">当前区域：</span>
-                      <span class="font-mono text-slate-700">{{.QuotaRegion}}</span>
-                      <span class="text-slate-300">|</span>
-                      <span class="font-semibold text-slate-500">{{if .QuotaOnName}}{{.QuotaOnName}}{{else}}On-Demand vCPU{{end}}：</span>
-                      <span class="font-bold text-slate-800">{{if .QuotaOn}}{{.QuotaOn}}{{else}}--{{end}}</span>
-                      <span class="text-slate-300">|</span>
-                      <span class="font-semibold text-slate-500">{{if .QuotaSpName}}{{.QuotaSpName}}{{else}}Spot vCPU{{end}}：</span>
-                      <span class="font-bold text-slate-800">{{if .QuotaSpot}}{{.QuotaSpot}}{{else}}--{{end}}</span>
+                    <div class="flex items-center gap-2 text-[10px] text-slate-500 border-t border-slate-100 pt-2">
+                       <span class="font-mono bg-slate-100 px-1 rounded">{{.QuotaRegion}}</span>
+                       <span>OD: <b class="text-slate-900">{{if .QuotaOn}}{{.QuotaOn}}{{else}}-{{end}}</b></span>
+                       <span class="text-slate-300">|</span>
+                       <span>Spot: <b class="text-slate-900">{{if .QuotaSpot}}{{.QuotaSpot}}{{else}}-{{end}}</b></span>
                     </div>
                   </form>
                 </div>
 
-                <details class="group/inner rounded-xl border border-slate-200 bg-slate-50/30 shadow-inner" open>
-                  <summary class="flex cursor-pointer list-none items-center justify-between px-4 py-3 text-xs font-bold text-slate-600 hover:bg-slate-50 rounded-t-xl transition-colors">
-                    <span>快速切换账号</span>
-                    <span class="text-slate-400 transition-transform group-open/inner:rotate-180">
-                      <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-                    </span>
-                  </summary>
-                  
-                  <div class="p-3 pt-0 space-y-3 bg-white rounded-b-xl">
-                    <div class="relative mt-2">
-                      <input id="accountSearch" type="text" placeholder="搜索账号名称或 ID..."
-                             class="w-full rounded-lg border border-slate-200 bg-slate-50 pl-9 pr-3 py-2 text-xs font-medium focus:border-primary-500 focus:bg-white focus:ring-2 focus:ring-primary-500/10 outline-none transition-all">
-                      <span class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
-                        <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 1010.5 18a7.5 7.5 0 006.15-3.35z"/></svg>
-                      </span>
-                    </div>
+                <div class="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
+                  <div class="border-b border-slate-100 p-2 bg-slate-50">
+                     <input id="accountSearch" type="text" placeholder="搜索..."
+                             class="w-full rounded-md border-0 bg-white px-3 py-1.5 text-xs font-medium ring-1 ring-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none placeholder:text-slate-400">
+                  </div>
 
-                    <div id="accountList" class="max-h-[220px] overflow-y-auto pr-1 no-scrollbar space-y-1">
-                      {{range .Keys}}
-                        <div class="account-row group/row flex items-center justify-between gap-3 rounded-lg border border-transparent p-2.5 hover:bg-slate-50 hover:border-slate-200 transition-all">
-                          <div class="min-w-0 flex-1">
-                            <div class="truncate font-bold text-slate-700 text-xs" data-name="{{.Name}}">{{.Name}}</div>
-                          </div>
-                          <div class="flex items-center gap-2">
-                            {{if .QuotaOn}}
-                              <span class="inline-flex min-w-[44px] items-center justify-center rounded-md border border-emerald-200/70 bg-emerald-50 px-2 py-1 text-[10px] font-bold text-emerald-700 text-center" title="{{if .QuotaRegion}}{{.QuotaRegion}}{{end}}">
-                                {{.QuotaOn}}V
-                              </span>
-                            {{else if .QuotaSpot}}
-                              <span class="inline-flex min-w-[44px] items-center justify-center rounded-md border border-indigo-200/70 bg-indigo-50 px-2 py-1 text-[10px] font-bold text-indigo-700 text-center" title="{{if .QuotaRegion}}{{.QuotaRegion}}{{end}}">
-                                Spot {{.QuotaSpot}}V
-                              </span>
-                            {{end}}
-                            <div class="flex items-center gap-1.5 opacity-0 group-hover/row:opacity-100 transition-opacity">
-                              <form method="post" action="/auth/select">
-                                <input type="hidden" name="csrf_token" value="{{$.CSRFToken}}">
-                                <input type="hidden" name="key_id" value="{{.ID}}">
-                                <button class="rounded-md bg-white border border-slate-200 px-2.5 py-1.5 text-[10px] font-bold text-slate-600 shadow-sm hover:border-primary-200 hover:text-primary-600 hover:bg-primary-50 transition">
-                                  {{if eq .ID $.PendingKey}}使用中{{else}}启用{{end}}
-                                </button>
-                              </form>
-                              <form method="post" action="/auth/delete">
-                                <input type="hidden" name="csrf_token" value="{{$.CSRFToken}}">
-                                <input type="hidden" name="key_id" value="{{.ID}}">
-                                <button class="rounded-md bg-white border border-slate-200 px-2.5 py-1.5 text-[10px] font-bold text-slate-400 hover:border-rose-200 hover:text-rose-600 hover:bg-rose-50 transition">
-                                  删除
-                                </button>
-                              </form>
-                            </div>
+                  <div id="accountList" class="max-h-[200px] overflow-y-auto no-scrollbar">
+                    {{range .Keys}}
+                      <div class="account-row group/row flex items-center justify-between p-2.5 hover:bg-slate-50 transition border-b border-slate-50 last:border-0">
+                        <div class="min-w-0 flex-1 pr-2">
+                          <div class="truncate font-bold text-slate-700 text-xs" data-name="{{.Name}}">{{.Name}}</div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                          {{if .QuotaOn}}
+                            <span class="inline-flex min-w-[36px] justify-center rounded bg-emerald-50 px-1.5 py-0.5 text-[9px] font-bold text-emerald-700 border border-emerald-100" title="{{if .QuotaRegion}}{{.QuotaRegion}}{{end}}">{{.QuotaOn}}v</span>
+                          {{else if .QuotaSpot}}
+                             <span class="inline-flex min-w-[36px] justify-center rounded bg-purple-50 px-1.5 py-0.5 text-[9px] font-bold text-purple-700 border border-purple-100" title="{{if .QuotaRegion}}{{.QuotaRegion}}{{end}}">S{{.QuotaSpot}}</span>
+                          {{end}}
+
+                          <div class="flex items-center gap-1">
+                            <form method="post" action="/auth/select">
+                              <input type="hidden" name="csrf_token" value="{{$.CSRFToken}}">
+                              <input type="hidden" name="key_id" value="{{.ID}}">
+                              <button class="rounded border border-slate-200 bg-white px-2 py-1 text-[10px] font-bold text-slate-600 hover:border-indigo-300 hover:text-indigo-600 hover:bg-indigo-50 transition">
+                                {{if eq .ID $.PendingKey}}使用中{{else}}切 换{{end}}
+                              </button>
+                            </form>
+                            <form method="post" action="/auth/delete">
+                              <input type="hidden" name="csrf_token" value="{{$.CSRFToken}}">
+                              <input type="hidden" name="key_id" value="{{.ID}}">
+                              <button class="opacity-0 group-hover/row:opacity-100 rounded border border-transparent px-1.5 py-1 text-[10px] font-bold text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition">
+                                删除
+                              </button>
+                            </form>
                           </div>
                         </div>
-                      {{end}}
-                    </div>
-                    <p id="accountEmpty" class="hidden text-[11px] text-slate-400 text-center py-4">未找到匹配的账号</p>
+                      </div>
+                    {{end}}
+                    <p id="accountEmpty" class="hidden text-[10px] text-slate-400 text-center py-4">无匹配账号</p>
                   </div>
-                </details>
+                </div>
+
               {{else}}
-                <div class="rounded-xl border border-dashed border-slate-300 bg-slate-50/50 px-6 py-8 text-center">
-                   <div class="text-slate-300 mb-2">
-                     <svg class="w-10 h-10 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4v16m8-8H4"/></svg>
-                   </div>
-                   <p class="text-xs font-medium text-slate-500">暂无账号</p>
-                   <p class="text-[10px] text-slate-400 mt-1">请先在左侧侧边栏保存 Access Key</p>
+                <div class="rounded-lg border border-dashed border-slate-300 bg-slate-50 p-6 text-center">
+                   <p class="text-xs text-slate-500">暂无账号，请先添加凭证。</p>
                 </div>
               {{end}}
             </div>
@@ -318,78 +310,67 @@
     </div>
 
     {{if .IsAdmin}}
-      <details class="group rounded-2xl bg-white border border-slate-200/60 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)]">
-        <summary class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 cursor-pointer list-none p-6">
+      <details class="group bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+        <summary class="flex items-center justify-between p-5 cursor-pointer select-none hover:bg-slate-50 transition">
           <div>
-            <h2 class="text-lg font-bold text-slate-900">管理员控制台</h2>
-            <p class="text-xs text-slate-400 mt-1">管理用户与注册开关</p>
+            <h2 class="text-sm font-bold text-slate-900">系统管理</h2>
+            <p class="text-xs text-slate-500 mt-0.5">用户管理 & 注册开关</p>
           </div>
-          <div class="flex items-center gap-2 text-xs font-semibold text-slate-500">
-            <span>点击展开</span>
-            <svg class="w-4 h-4 text-slate-400 transition-transform duration-200 group-open:rotate-180" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-              <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 10.94l3.71-3.71a.75.75 0 1 1 1.06 1.06l-4.24 4.24a.75.75 0 0 1-1.06 0L5.21 8.29a.75.75 0 0 1 .02-1.08z" clip-rule="evenodd" />
-            </svg>
-          </div>
+           <span class="text-slate-400 group-open:rotate-180 transition-transform duration-300">
+              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+            </span>
         </summary>
-        <div class="px-6 pb-6 space-y-6 border-t border-slate-100">
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-6">
-            <div>
-              <p class="text-xs text-slate-400 mt-1">管理用户与注册开关</p>
-            </div>
-            <form method="post" action="/admin/registration" class="flex items-center gap-2">
+        <div class="px-5 pb-6 pt-2 border-t border-slate-100 bg-slate-50/50">
+          <div class="flex items-center justify-between gap-4 mt-2 mb-4">
+             <span class="text-xs font-bold text-slate-500 uppercase">注册状态</span>
+            <form method="post" action="/admin/registration">
               <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
               <input type="hidden" name="open" value="{{if .RegistrationOpen}}0{{else}}1{{end}}">
               {{if .RegistrationOpen}}
-                <span class="inline-flex items-center gap-2 text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200/70 px-3 py-1.5 rounded-full">
-                  <span class="w-2 h-2 rounded-full bg-emerald-500"></span> 注册开启
-                </span>
-                <button class="rounded-full border border-rose-200 bg-rose-50 px-4 py-2 text-xs font-bold text-rose-600 hover:bg-rose-100 transition">
-                  关闭注册
+                <button class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-emerald-200 bg-emerald-50 text-xs font-bold text-emerald-700 hover:bg-rose-50 hover:text-rose-700 hover:border-rose-200 transition group/btn">
+                  <span class="w-2 h-2 rounded-full bg-emerald-500 group-hover/btn:bg-rose-500"></span>
+                  <span class="group-hover/btn:hidden">注册已开启</span>
+                  <span class="hidden group-hover/btn:inline">点击关闭</span>
                 </button>
               {{else}}
-                <span class="inline-flex items-center gap-2 text-xs font-semibold text-slate-600 bg-slate-100 border border-slate-200 px-3 py-1.5 rounded-full">
-                  <span class="w-2 h-2 rounded-full bg-slate-400"></span> 注册关闭
-                </span>
-                <button class="rounded-full border border-emerald-200 bg-emerald-50 px-4 py-2 text-xs font-bold text-emerald-600 hover:bg-emerald-100 transition">
-                  打开注册
+                <button class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-slate-200 bg-slate-100 text-xs font-bold text-slate-600 hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-200 transition group/btn">
+                  <span class="w-2 h-2 rounded-full bg-slate-400 group-hover/btn:bg-emerald-500"></span>
+                  <span class="group-hover/btn:hidden">注册已关闭</span>
+                  <span class="hidden group-hover/btn:inline">点击开启</span>
                 </button>
               {{end}}
             </form>
           </div>
 
-          <div class="overflow-hidden rounded-xl border border-slate-200">
-            <div class="flex items-center justify-between bg-slate-50 px-4 py-3 text-xs font-bold text-slate-500">
-              <span>用户列表</span>
-              <span>{{len .Users}} 位用户</span>
-            </div>
-            <div class="divide-y divide-slate-100">
+          <div class="rounded-lg border border-slate-200 bg-white overflow-hidden">
+             <div class="bg-slate-50 px-4 py-2 text-[10px] font-bold text-slate-500 uppercase tracking-wide border-b border-slate-200 flex justify-between">
+               <span>用户列表</span>
+               <span>Total: {{len .Users}}</span>
+             </div>
+             <div class="divide-y divide-slate-100">
               {{range .Users}}
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 py-3">
+                <div class="flex items-center justify-between px-4 py-3 hover:bg-slate-50 transition">
                   <div>
                     <div class="text-sm font-semibold text-slate-800">{{.Username}}</div>
-                    <div class="text-[10px] text-slate-400">ID: {{.ID}}</div>
+                    <div class="text-[10px] text-slate-400 font-mono">ID: {{.ID}}</div>
                   </div>
-                  <div class="flex items-center gap-2">
-                    {{if .IsAdmin}}
-                      <span class="inline-flex items-center gap-1 rounded-full bg-indigo-50 border border-indigo-200/70 px-3 py-1 text-[10px] font-bold text-indigo-600">管理员</span>
-                    {{else}}
-                      <span class="inline-flex items-center gap-1 rounded-full bg-slate-100 border border-slate-200 px-3 py-1 text-[10px] font-bold text-slate-500">用户</span>
-                    {{end}}
+                  <div class="flex items-center gap-3">
+                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full {{if .IsAdmin}}bg-indigo-50 text-indigo-600 border border-indigo-100{{else}}bg-slate-100 text-slate-500 border border-slate-200{{end}}">
+                      {{if .IsAdmin}}ADMIN{{else}}USER{{end}}
+                    </span>
                     {{if ne .ID $.CurrentUserID}}
                       <form method="post" action="/admin/users/delete">
                         <input type="hidden" name="csrf_token" value="{{$.CSRFToken}}">
                         <input type="hidden" name="user_id" value="{{.ID}}">
-                        <button class="rounded-full border border-rose-200 bg-rose-50 px-3 py-1.5 text-[10px] font-bold text-rose-600 hover:bg-rose-100 transition">
-                          删除
+                        <button class="text-slate-400 hover:text-rose-600 transition">
+                          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                         </button>
                       </form>
-                    {{else}}
-                      <span class="text-[10px] text-slate-400">当前账号</span>
                     {{end}}
                   </div>
                 </div>
               {{end}}
-            </div>
+             </div>
           </div>
         </div>
       </details>
@@ -399,11 +380,11 @@
       {{template "index" .}}
     </div>
 
-    <div class="pt-8 text-center">
-      <p class="text-[10px] text-slate-300 font-medium">Light Mode UI • Powered by AutoSail</p>
-    </div>
+    <footer class="pt-8 text-center pb-8 border-t border-slate-200/50 mt-12">
+      <p class="text-[10px] text-slate-400 font-medium">AutoSail Cloud Manager</p>
+    </footer>
 
-  </div>
+  </main>
 
   <script>
     (function(){
@@ -618,7 +599,6 @@
       });
     })();
   </script>
-
 </body>
 </html>
 {{end}}

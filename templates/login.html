@@ -33,26 +33,26 @@
     }
   </script>
 </head>
-<body class="min-h-screen bg-slate-50 flex items-center justify-center p-6 relative overflow-hidden">
+<body class="min-h-screen bg-slate-50 flex items-center justify-center p-4 relative overflow-hidden">
   
-  <div class="absolute top-0 -left-4 w-72 h-72 bg-purple-200 rounded-full mix-blend-multiply filter blur-2xl opacity-40 animate-blob"></div>
-  <div class="absolute top-0 -right-4 w-72 h-72 bg-indigo-200 rounded-full mix-blend-multiply filter blur-2xl opacity-40 animate-blob animation-delay-2000"></div>
-  <div class="absolute -bottom-8 left-20 w-72 h-72 bg-pink-200 rounded-full mix-blend-multiply filter blur-2xl opacity-40 animate-blob animation-delay-4000"></div>
+  <div class="absolute top-0 -left-4 w-96 h-96 bg-purple-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob"></div>
+  <div class="absolute top-0 -right-4 w-96 h-96 bg-indigo-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-2000"></div>
+  <div class="absolute -bottom-8 left-20 w-96 h-96 bg-pink-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-4000"></div>
 
   <div class="w-full max-w-md relative z-10">
     
-    <div class="bg-white/80 backdrop-blur-xl border border-white/50 rounded-3xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] p-8 sm:p-10">
+    <div class="bg-white/70 backdrop-blur-xl border border-white/60 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-8 sm:p-10">
       
-      <div class="text-center mb-8">
-        <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-slate-900 text-white mb-4 shadow-lg shadow-slate-900/20">
-          <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11c1.657 0 3-1.343 3-3S13.657 5 12 5s-3 1.343-3 3 1.343 3 3 3z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.5 20a6.5 6.5 0 0113 0"/></svg>
+      <div class="text-center mb-10">
+        <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-slate-900 text-white mb-5 shadow-lg shadow-slate-900/20">
+          <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11c1.657 0 3-1.343 3-3S13.657 5 12 5s-3 1.343-3 3 1.343 3 3 3z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.5 20a6.5 6.5 0 0113 0"/></svg>
         </div>
-        <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">AutoSail 登录</h1>
-        <p class="text-sm text-slate-500 font-medium mt-2">请输入您的管理账号进入控制台</p>
+        <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">欢迎回来</h1>
+        <p class="text-sm text-slate-500 font-medium mt-2">AutoSail Cloud Management</p>
       </div>
 
       {{if or .Flash.Success .Flash.Error .Flash.Warn .Flash.Info}}
-      <div class="space-y-2 mb-6">
+      <div class="space-y-3 mb-6">
         {{if .Flash.Error}}
           <div class="flex items-center gap-3 rounded-xl border border-rose-100 bg-rose-50/80 px-4 py-3 text-sm text-rose-800 animate-pulse">
             <svg class="w-5 h-5 text-rose-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -72,36 +72,37 @@
       </div>
       {{end}}
 
-      <form method="post" action="/login" class="space-y-5">
+      <form method="post" action="/login" class="space-y-6">
         <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
-        <div>
-          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1.5 ml-1">用户名</label>
-          <input name="username" placeholder="admin"
-                 class="block w-full rounded-xl border-gray-200 bg-gray-50/50 px-4 py-3 text-sm font-semibold text-slate-900 transition-all hover:bg-white focus:bg-white focus:border-slate-900 focus:ring-4 focus:ring-slate-900/10 outline-none placeholder:text-gray-400">
+        <div class="space-y-2">
+          <label class="block text-xs font-bold text-slate-600 uppercase tracking-wide ml-1">用户名</label>
+          <input name="username" placeholder="Enter username"
+                 class="block w-full rounded-xl border border-slate-200 bg-white/50 px-4 py-3.5 text-sm font-semibold text-slate-900 transition-all focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none placeholder:text-slate-400">
         </div>
-        <div>
-          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1.5 ml-1">密码</label>
+        <div class="space-y-2">
+          <label class="block text-xs font-bold text-slate-600 uppercase tracking-wide ml-1">密码</label>
           <input name="password" type="password" placeholder="••••••••"
-                 class="block w-full rounded-xl border-gray-200 bg-gray-50/50 px-4 py-3 text-sm font-semibold text-slate-900 transition-all hover:bg-white focus:bg-white focus:border-slate-900 focus:ring-4 focus:ring-slate-900/10 outline-none placeholder:text-gray-400">
+                 class="block w-full rounded-xl border border-slate-200 bg-white/50 px-4 py-3.5 text-sm font-semibold text-slate-900 transition-all focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none placeholder:text-slate-400">
         </div>
         
         <div class="pt-2">
-          <button class="w-full rounded-xl bg-slate-900 text-white shadow-lg shadow-slate-900/30 py-3.5 text-sm font-bold hover:bg-slate-800 hover:-translate-y-0.5 hover:shadow-xl active:translate-y-0 active:scale-[0.98] transition-all duration-200">
+          <button class="w-full rounded-xl bg-slate-900 text-white shadow-lg shadow-slate-900/20 py-4 text-sm font-bold hover:bg-slate-800 hover:-translate-y-0.5 hover:shadow-xl active:translate-y-0 active:scale-[0.98] transition-all duration-200">
             登 录
           </button>
         </div>
       </form>
-      <div class="mt-5 text-center text-xs text-slate-500">
+
+      <div class="mt-8 pt-6 border-t border-slate-100 text-center text-xs text-slate-500">
         {{if .RegistrationOpen}}
-          还没有账号？<a href="/register" class="font-bold text-primary-600 hover:text-primary-700">立即注册</a>
+          还没有账号？<a href="/register" class="font-bold text-indigo-600 hover:text-indigo-700 transition-colors">立即注册</a>
         {{else}}
           <span class="text-slate-400">注册通道已关闭</span>
         {{end}}
       </div>
     </div>
     
-    <div class="mt-8 text-center text-xs text-slate-400 font-medium">
-      &copy; 2024 AutoSail Manager System
+    <div class="mt-8 text-center text-[10px] text-slate-400 font-medium">
+      &copy; 2024 AutoSail System
     </div>
   </div>
 </body>
